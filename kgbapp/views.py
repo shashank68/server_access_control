@@ -12,7 +12,15 @@ from utils import *
 
 
 def index(request):
-    return render(request, 'index.html')
+    authenticated = True
+    if authenticated:
+        servers = Clientserver.objects.all()
+        server_list = []
+        for server in servers:
+            server_list.append([server.address, server.sudo_user])
+        noservers = True if len(server_list) == 0 else False
+        context = {"servers": server_list, "noservers": noservers}
+        return render(request, 'index.html', context)
 
 
 def add_server(request):
@@ -20,16 +28,15 @@ def add_server(request):
         return render(request, 'addserver.html')
     elif request.method == "POST":
         # todo purify these values
-        print(request.POST)
         sudo_user = request.POST["username"]
         server_address = request.POST["address"]
         server_passwd = request.POST["password"]
         (b_enc_pass, b_salt) = encrypt_password(server_passwd)
 
-        if ip_regex.fullmatch(server_address) is None and hostname_regex.fullmatch(server_address) is None:
+        if is_address_invalid(server_address):
             # the address is neither a valid hostname nor a valid ip address
             pass
-        elif username_regex.fullmatch(sudo_user) is None:
+        elif is_username_invalid(sudo_user):
             # invalid username
             pass
         elif len(Clientserver.objects.filter(address=server_address)) != 0:
@@ -40,6 +47,67 @@ def add_server(request):
                                sudo_user=sudo_user, enc_client_password=b_enc_pass, enc_salt=b_salt)
             srv.save()
     return redirect('/addserver')
+
+
+def manage_server(request):
+    if request.method == "GET":
+        return redirect('/')
+    elif request.method == "POST":
+        server_address = request.POST["address"]
+        action = request.POST["actiontype"]
+        if is_address_invalid(server_address):
+            pass
+        else:
+            server = Clientserver.objects.filter(address=server_address)[0]
+            if action == "view":
+                context = {
+                    'address': server_address,
+                    'sudo_user': server.sudo_user,
+                }
+                return render(request, 'manageserver.html', context)
+            elif action == "update":
+                if "changeusername" in request.POST:
+                    username = request.POST["username"]
+                    if is_username_invalid(username):
+                        pass
+                    else:
+                        server.sudo_user = username
+                        server.save()
+                if "changepassword" in request.POST:
+                    passwd = request.POST["password"]
+                    (b_enc_pass, b_salt) = encrypt_password(passwd)
+                    server.enc_client_password = b_enc_pass
+                    server.enc_salt = b_salt
+                    server.save()
+                return redirect('/')
+        return HttpResponse("ERROR modifying")
+
+
+def delete_server(request):
+    if request.method == "GET":
+        return render(request, 'index.html')
+    else:
+        server_address = request.POST["address"]
+        if is_address_invalid(server_address):
+            pass
+        elif len(Clientserver.objects.filter(address=server_address)) == 0:  # no such server
+            pass
+        else:
+            users = Userhost.objects.filter(server_address=server_address)
+            if "remove_users" in request.POST:
+                # delete the users from the server if selected
+                conn = make_connection(server_address)
+                for usr in users:
+                    res = conn.sudo(
+                        f'deluser --remove-home {quote(usr.user_name)}')
+                conn.close()
+
+            for usr in users:  # remove users frm database
+                usr.delete()
+            server = Clientserver.objects.get(address=server_address)
+            server.delete()
+            return redirect('/')
+        return HttpResponse("ERROR :/")
 
 
 def create_user(request):

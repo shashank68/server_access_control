@@ -3,6 +3,37 @@
 
 {% block content %}
 
+{% if noservers %}
+    <center><a href="/addserver"><h1>Click here to add a server</h1></a></center>
+{% else %}
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Server</th>
+            <th scope="col">Sudo User</th>
+            <th scope="col">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for address, username in servers %}
+        <tr>
+            <th scope="row">{{forloop.counter}}</th>
+            <td>{{address}}</td>
+            <td>{{username}}</td>
+            <td>
+                <form method="POST" action="/manageserver/">
+                    {% csrf_token %}
+                    <input type="hidden" value="view" name="actiontype">
+                    <input type="hidden" value="{{address}}" name="address">
+                    <button type="submit" class="btn btn-primary">Manage Server</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
 
 
 {% endblock %}

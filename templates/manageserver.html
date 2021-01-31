@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %} Manage Server {% endblock %}
+
+{% block content %}
+
+<style>
+    .container {
+        max-width: 700px;
+    }
+</style>
+
+<form method="POST" action="/manageserver/" class="form-container" autocomplete="off">
+    {% csrf_token %}
+    <input type="hidden" value="update" name="actiontype">
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="{{sudo_user}}" aria-label="Username" value="{{sudo_user}}"
+            name="username" id="username">
+        <span class="input-group-text">@</span>
+        <input type="text" class="form-control" placeholder="{{address}}" aria-label="Server" disabled>
+        <input type="hidden" value="{{address}}" name="address">
+    </div>
+    <div class="row g-3 align-items-center">
+
+        <div class="col-auto">
+            <input type="password" id="password" class="form-control validate" aria-describedby="passwordHelpInline"
+                placeholder="Sudo Password" name="password">
+        </div>
+
+        <div class="col-auto">
+            <input type="password" id="confirm_password" class="form-control validate"
+                aria-describedby="passwordHelpInline" placeholder="Confirm Password">
+        </div>
+
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="changepassword" name="changepassword">
+            <label class="form-check-label" for="changepassword">Update Password</label>
+        </div>
+
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="changeusername" name="changeusername">
+            <label class="form-check-label" for="changeusername">Update Sudo Username</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="submitbutton" disabled>Update details</button>
+
+    </div>
+
+</form>
+
+<div class="container" style="padding-top: 5vh;">
+    <form method="POST" action="/deleteserver/" class="form-container" autocomplete="off">
+        {% csrf_token %}
+        <input type="hidden" value="{{address}}" name="address">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Type Delete to confirm deletion of the server"
+                aria-label="Delete" id="confirmdelete">
+
+        </div>
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="remove_users" name="remove_users">
+            <label class="form-check-label" for="remove_users">Delete users added to this server</label>
+        </div>
+        <button type="submit" class="btn btn-danger" id="deletebutton" disabled>Delete Server</button>
+    </form>
+</div>
+
+
+<script>
+    var password = document.getElementById("password")
+        , confirm_password = document.getElementById("confirm_password");
+
+    function validatePassword() {
+        password = document.getElementById("password")
+            , confirm_password = document.getElementById("confirm_password");
+        if (password.value != confirm_password.value) {
+            confirm_password.setCustomValidity("Passwords don't Match");
+            return false;
+        } else {
+            confirm_password.setCustomValidity('');
+            if (password.value != "") {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+    function changestate() {
+        var a = document.getElementById("changepassword").checked, b = document.getElementById("changeusername").checked;
+        document.getElementById("submitbutton").disabled = !(a || b);
+
+        if (a && !validatePassword())
+            document.getElementById("submitbutton").disabled = true;
+        if (b)
+            document.getElementById("submitbutton").disabled = document.getElementById("username").value == "";
+        document.getElementById("submitbutton").disabled |= !(a || b);
+    }
+    password.onchange = changestate;
+    confirm_password.onkeyup = changestate;
+
+    document.getElementById("username").onchange = changestate;
+    document.getElementById("changeusername").onchange = changestate;
+    document.getElementById("changepassword").onchange = changestate;
+
+    document.getElementById("confirmdelete").onchange = function () {
+        document.getElementById("deletebutton").disabled = !(document.getElementById("confirmdelete").value == "Delete");
+    }
+</script>
+
+{% endblock %}
