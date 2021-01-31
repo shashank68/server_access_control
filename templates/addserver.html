@@ -1,20 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Server</title>
-</head>
-<body>
-    <form method="POST">
-        {% csrf_token %}
-        Sudo user <br>
-        <input type="text" name="username"><br>
-        Ip address <br>
-        <input type="text" name="address"><br>
-        Password <br>
-        <input type="password" name="password"><br>
-        <button action="submit">Submit</button>
-    </form>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %} Add Server {% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: #383a3d;
+    }
+    /* set form background colour*/
+    form {
+        background: #fff;
+    }
+
+    #form-box {
+        padding-top: 25vh;
+    }
+
+    /* set padding and size of th form */
+    .form-container {
+        border-radius: 10px;
+        padding: 40px;
+    }
+</style>
+
+<section class="container-fluid" id="form-box">
+    <section class="row justify-content-center">
+        <section class="col-12 col-sm-6 col-md-4">
+            <form method="POST" class="form-container">
+                {% csrf_token %}
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="sudo user" aria-label="Username"
+                        name="username">
+                    <span class="input-group-text">@</span>
+                    <input type="text" class="form-control" placeholder="Server" aria-label="Server" name="address">
+                </div>
+                <div class="row g-3 align-items-center">
+                    <div class="col-auto">
+                        <input type="password" id="inputPassword6" class="form-control"
+                            aria-describedby="passwordHelpInline" placeholder="Password">
+                    </div>
+                    <div class="col-auto">
+                        <span id="passwordHelpInline" class="form-text">
+                            Sudo password
+                        </span>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Server</button>
+
+                </div>
+            </form>
+        </section>
+    </section>
+</section>
+{% endblock %}
