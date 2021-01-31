@@ -48,7 +48,8 @@ def create_user(request):
     elif request.method == "POST":
         username = request.POST["username"]
         server_address = request.POST["server_address"]
-        is_sudo = request.POST["sudo"]
+
+        is_sudo = True if "sudo" in request.POST else False
         if is_address_invalid(server_address):  # not a valid host or ip
             pass
         elif is_username_invalid(username):  # not a valid username
