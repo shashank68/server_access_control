@@ -1,11 +1,11 @@
 import uuid
+import crypt
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .models import Clientserver, Userhost
 from django.utils import timezone
 
-import crypt
 from shlex import quote
 
 from utils import *
@@ -95,31 +95,30 @@ def delete_user(request):
     else:
         username = request.POST["username"]
         server_address = request.POST["address"]
-        
-        if is_username_invalid(username) or is_address_invalid(server_address): # invalid inputs
+
+        if is_username_invalid(username) or is_address_invalid(server_address):
+            # invalid inputs
             pass
         elif len(Userhost.objects.filter(server_address=server_address).filter(user_name=username)) == 0:
             # this user-host doesn't exist in database;
             pass
-        elif len(Clientserver.objects.filter(address=server_address)) == 0: # this server isn't in database
+        elif len(Clientserver.objects.filter(address=server_address)) == 0:
+            # this server isn't in database
             pass
         else:
             conn = make_connection(server_address)
             res = conn.sudo(f'deluser --remove-home {quote(username)}')
             conn.close()
             exit_code = res.exited
-            if exit_code != 0: # error. Needs to be handled manually by logging into server
+            if exit_code != 0:  # error. Needs to be handled manually by logging into server
                 pass
             else:
                 try:
-                    userhost = Userhost.objects.get(user_name=username, server_address=server_address)
+                    userhost = Userhost.objects.get(
+                        user_name=username, server_address=server_address)
                     userhost.delete()
                     return HttpResponse("User deleted succesfully")
                 except:
                     print("Multiple objects!!")
                     pass
         return HttpResponse("Error: Couldn't succesfully delete user")
-        
-
-        
-

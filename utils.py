@@ -54,5 +54,6 @@ def decrypt_password(b_enc_passwd, b_salt):
 def is_address_invalid(server_address):
     return ip_regex.fullmatch(server_address) is None and hostname_regex.fullmatch(server_address) is None
 
+
 def is_username_invalid(username):
     return username_regex.fullmatch(username) is None
