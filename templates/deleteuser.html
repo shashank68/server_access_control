@@ -1,18 +1,69 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delete user</title>
-</head>
-<body>
-    <form method="POST">
-        {% csrf_token %}
-        Username <br>
-        <input type="text" name="username"><br>
-        Server address <br>
-        <input type="text" name="address"><br>
-        <button action="submit">Submit</button>
-    </form>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %} Delete Users {% endblock %}
+
+{% block content %}
+
+<style>
+    .container {
+        max-width: 700px;
+    }
+</style>
+{% if nousers %}
+<center><a href="/create_user">
+        <h1>No users to delete. Click here to add a user</h1>
+    </a></center>
+{% else %}
+<form method="POST" action="/delete_user/" class="form-container" autocomplete="off">
+    {% csrf_token %}
+    <div class="input-group mb-3">
+        <select class="form-select" name="server_address" id="serverselect">
+            <option value="0">Choose Server</option>
+        </select>
+        <select class="form-select" name="username" id="userselect">
+            <option value="0">Choose User</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-danger" id="submitbutton" disabled>Delete User</button>
+</form>
+{% endif %}
+
+
+<script>
+    var lst = JSON.parse("{{serv_dict|escapejs}}");
+    console.log(lst);
+
+    var servsel = document.getElementById("serverselect");
+    for (var srvaddr in lst) {
+        var option = document.createElement("option");
+        option.text = srvaddr;
+        option.value = srvaddr;
+        servsel.add(option);
+    }
+
+    function listusers() {
+        var usrslct = document.getElementById("userselect");
+        var srvaddr = document.getElementById("serverselect").value;
+        var i, L = usrslct.options.length - 1;
+        for (i = L; i >= 1; i--) {
+            usrslct.remove(i);
+        }
+        if (srvaddr != "0") {
+            for (var usr of lst[srvaddr]) {
+                var option = document.createElement("option");
+                option.value = usr;
+                option.text = usr;
+                usrslct.add(option);
+            }
+        }
+    }
+    function enablebutton() {
+        document.getElementById("submitbutton").disabled = !(document.getElementById("userselect").value != "0" && document.getElementById("serverselect").value != "0")
+    }
+    servsel.onchange = listusers;
+    document.getElementById("userselect").onchange = enablebutton;
+
+
+</script>
+
+{% endblock %}

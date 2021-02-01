@@ -7,6 +7,7 @@ from .models import Clientserver, Userhost
 from django.utils import timezone
 
 from shlex import quote
+from json import dumps
 
 from utils import *
 
@@ -168,10 +169,19 @@ def create_user(request):
 
 def delete_user(request):
     if request.method == "GET":
-        return render(request, 'deleteuser.html')
+        servers = Clientserver.objects.all()
+        serv_dict = {}
+        for server in servers:
+            userhosts = Userhost.objects.filter(server_address=server.address)
+            if len(userhosts) != 0:
+                serv_dict[server.address] = [usr.user_name for usr in userhosts]
+        nousers = True if len(serv_dict) == 0 else False
+        serv_dict = dumps(serv_dict)
+        context = {'serv_dict': serv_dict, 'nousers': nousers}
+        return render(request, 'deleteuser.html', context)
     else:
         username = request.POST["username"]
-        server_address = request.POST["address"]
+        server_address = request.POST["server_address"]
 
         if is_username_invalid(username) or is_address_invalid(server_address):
             # invalid inputs

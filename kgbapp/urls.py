@@ -10,3 +10,4 @@ urlpatterns = [
     path('deleteserver/', views.delete_server, name='delete_server'),
     path('manageserver/', views.manage_server, name='manage_server'),
 ]
+    

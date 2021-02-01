@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %} Manage Server {% endblock %}
+{% block title %} Create Users {% endblock %}
 
 {% block content %}
 
@@ -9,7 +9,11 @@
     }
 </style>
 {% if noservers is None and created_user_password %}
-    <h2>Temporory password for <code>{{username}}@{{server_addr}}</code> <center><h1>{{created_user_password}}</h1></center></h2>
+<h2>Temporory password for <code>{{username}}@{{server_addr}}</code>
+    <center>
+        <h1>{{created_user_password}}</h1>
+    </center>
+</h2>
 {% elif noservers%}
 <center><a href="/addserver">
         <h1>Click here to add a server before adding users</h1>
