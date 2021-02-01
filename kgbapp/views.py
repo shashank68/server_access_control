@@ -112,12 +112,18 @@ def delete_server(request):
 
 def create_user(request):
     if request.method == "GET":
-        return render(request, 'createuser.html')
+        servers = Clientserver.objects.all()
+        server_list = []
+        for server in servers:
+            server_list.append(server.address)
+        noservers = True if len(server_list) == 0 else False
+        context = {"servers": server_list, "noservers": noservers}
+        return render(request, 'createuser.html', context)
     elif request.method == "POST":
         username = request.POST["username"]
         server_address = request.POST["server_address"]
 
-        is_sudo = True if "sudo" in request.POST else False
+        is_sudo = True if "sudopriv" in request.POST else False
         if is_address_invalid(server_address):  # not a valid host or ip
             pass
         elif is_username_invalid(username):  # not a valid username
@@ -152,6 +158,9 @@ def create_user(request):
                     userhost = Userhost(date_updated=timezone.now(),
                                         server_address=server_address, user_name=username)
                     userhost.save()
+                    context = {'created_user_password': s_user_passwd,
+                               "username": username, "server_addr": server_address}
+                    return render(request, 'createuser.html', context)
                     return HttpResponse(s_user_passwd)
             conn.close()
         return HttpResponse("ERROR: Couldnt add user")

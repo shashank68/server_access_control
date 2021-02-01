@@ -1,20 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create user</title>
-</head>
-<body>
-    <form method="POST">
-        {% csrf_token %}
-        Username <br>
-        <input type="text" name="username"><br>
-        Server address <br>
-        <input type="text" name="server_address"><br>
-        Sudo Privileges
-        <input type="checkbox" name="sudo"><br>
-        <button action="submit">Submit</button>
-    </form>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %} Manage Server {% endblock %}
+
+{% block content %}
+
+<style>
+    .container {
+        max-width: 700px;
+    }
+</style>
+{% if noservers is None and created_user_password %}
+    <h2>Temporory password for <code>{{username}}@{{server_addr}}</code> <center><h1>{{created_user_password}}</h1></center></h2>
+{% elif noservers%}
+<center><a href="/addserver">
+        <h1>Click here to add a server before adding users</h1>
+    </a></center>
+{% else %}
+<form method="POST" action="/create_user/" class="form-container" autocomplete="off">
+    {% csrf_token %}
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="Username" name="username" id="username">
+        <span class="input-group-text">@</span>
+        <select class="form-select" name="server_address" id="serverselect">
+            <option value="0">Choose Server</option>
+            {% for srv in servers %}
+            <option value="{{srv}}">{{srv}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="sudopriv" name="sudopriv">
+        <label class="form-check-label" for="sudopriv">Sudo Privileges</label>
+    </div>
+
+    <button type="submit" class="btn btn-primary" id="submitbutton" disabled>Add User</button>
+</form>
+{% endif %}
+
+
+<script>
+    function enablebutton() {
+        document.getElementById("submitbutton").disabled = !(document.getElementById("username").value != "" && document.getElementById("serverselect").value != "0")
+    }
+    document.getElementById("username").onchange = enablebutton;
+    document.getElementById("serverselect").onchange = enablebutton;
+
+</script>
+
+{% endblock %}
