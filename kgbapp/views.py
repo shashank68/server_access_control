@@ -174,7 +174,8 @@ def delete_user(request):
         for server in servers:
             userhosts = Userhost.objects.filter(server_address=server.address)
             if len(userhosts) != 0:
-                serv_dict[server.address] = [usr.user_name for usr in userhosts]
+                serv_dict[server.address] = [
+                    usr.user_name for usr in userhosts]
         nousers = True if len(serv_dict) == 0 else False
         serv_dict = dumps(serv_dict)
         context = {'serv_dict': serv_dict, 'nousers': nousers}
@@ -204,7 +205,7 @@ def delete_user(request):
                     userhost = Userhost.objects.get(
                         user_name=username, server_address=server_address)
                     userhost.delete()
-                    return HttpResponse("User deleted succesfully")
+                    return redirect('/delete_user')
                 except:
                     print("Multiple objects!!")
                     pass
